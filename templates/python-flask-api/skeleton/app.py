@@ -19,7 +19,7 @@ items = [
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
-    return jsonify({"status": "healthy", "service": "{{appName}}"}), 200
+    return jsonify({"status": "healthy", "service": "${{ values.appName }}"}), 200
 
 @app.route('/api/v1/items', methods=['GET'])
 def get_items():

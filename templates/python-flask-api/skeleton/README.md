@@ -1,6 +1,6 @@
-# {{appName}}
+# ${{ values.appName }}
 
-{{description}}
+${{ values.description }}
 
 ## Description
 
@@ -63,12 +63,12 @@ gunicorn --bind 0.0.0.0:5000 --workers 4 app:app
 
 Build the Docker image:
 ```bash
-docker build -t {{appName}} .
+docker build -t ${{ values.appName }} .
 ```
 
 Run the container:
 ```bash
-docker run -p 5000:5000 {{appName}}
+docker run -p 5000:5000 ${{ values.appName }}
 ```
 
 ## API Endpoints
@@ -137,10 +137,10 @@ gcloud builds submit --config cloudbuild.yaml .
 
 1. Create an Artifact Registry repository:
 ```bash
-gcloud artifacts repositories create {{appName}} \
+gcloud artifacts repositories create ${{ values.appName }} \
   --repository-format=docker \
   --location=us-central1 \
-  --description="Docker repository for {{appName}}"
+  --description="Docker repository for ${{ values.appName }}"
 ```
 
 2. Create a service account for CI/CD:
@@ -148,8 +148,8 @@ gcloud artifacts repositories create {{appName}} \
 gcloud iam service-accounts create github-actions \
   --display-name="GitHub Actions"
 
-gcloud projects add-iam-policy-binding {{gcpProjectId}} \
-  --member="serviceAccount:github-actions@{{gcpProjectId}}.iam.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding ${{ values.gcpProjectId }} \
+  --member="serviceAccount:github-actions@${{ values.gcpProjectId }}.iam.gserviceaccount.com" \
   --role="roles/artifactregistry.writer"
 ```
 

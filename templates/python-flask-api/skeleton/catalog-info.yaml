@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: {{appName}}
-  description: {{description}}
+  name: ${{ values.appName }}
+  description: ${{ values.description }}
   tags:
     - python
     - flask
@@ -11,32 +11,32 @@ metadata:
     - kubernetes
   annotations:
     # GitHub integration
-    github.com/project-slug: {{orgName}}/{{appName}}
+    github.com/project-slug: ${{ values.orgName }}/${{ values.appName }}
 
     # ArgoCD integration
-    argocd/app-name: {{appName}}
+    argocd/app-name: ${{ values.appName }}
     argocd/app-namespace: argocd
 
     # Kubernetes integration
-    backstage.io/kubernetes-id: {{appName}}
-    backstage.io/kubernetes-namespace: {{namespace}}
-    backstage.io/kubernetes-label-selector: app={{appName}}
+    backstage.io/kubernetes-id: ${{ values.appName }}
+    backstage.io/kubernetes-namespace: ${{ values.namespace }}
+    backstage.io/kubernetes-label-selector: app=${{ values.appName }}
 
     # Container image
-    backstage.io/container-image: us-central1-docker.pkg.dev/{{gcpProjectId}}/{{appName}}/{{appName}}
+    backstage.io/container-image: us-central1-docker.pkg.dev/${{ values.gcpProjectId }}/${{ values.appName }}/${{ values.appName }}
 
     # TechDocs (optional - enable if you add docs)
     # backstage.io/techdocs-ref: dir:.
 
   links:
     - title: GitHub Repository
-      url: https://github.com/{{orgName}}/{{appName}}
+      url: https://github.com/${{ values.orgName }}/${{ values.appName }}
       icon: github
     - title: ArgoCD Application
-      url: https://argocd.example.com/applications/{{appName}}
+      url: https://argocd.example.com/applications/${{ values.appName }}
       icon: cloud
     - title: API Health Check
-      url: https://{{appName}}.example.com/health
+      url: https://${{ values.appName }}.example.com/health
       icon: dashboard
 
 spec:

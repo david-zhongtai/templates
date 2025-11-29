@@ -13,21 +13,21 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:$COMMIT_SHA'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:latest'
       - '.'
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:$COMMIT_SHA'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:latest'
 
   # Update the Kubernetes deployment manifest
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -35,12 +35,12 @@ steps:
     args:
       - '-c'
       - |
-        sed -i "s|image:.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA|g" manifests/deployment.yaml
+        sed -i "s|image:.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:$COMMIT_SHA|g" manifests/deployment.yaml
         cat manifests/deployment.yaml
 
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA'
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/${{ values.appName }}/${{ values.appName }}:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -6,6 +6,6 @@ resources:
   - service.yaml
 
 commonLabels:
-  app.kubernetes.io/name: {{appName}}
+  app.kubernetes.io/name: ${{ values.appName }}
   app.kubernetes.io/managed-by: argocd
 

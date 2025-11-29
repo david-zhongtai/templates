@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{appName}}
+  name: ${{ values.appName }}
   labels:
-    app: {{appName}}
+    app: ${{ values.appName }}
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: {{appName}}
+      app: ${{ values.appName }}
   template:
     metadata:
       labels:
-        app: {{appName}}
+        app: ${{ values.appName }}
     spec:
       containers:
-        - name: {{appName}}
-          image: us-central1-docker.pkg.dev/{{gcpProjectId}}/{{appName}}/{{appName}}:latest
+        - name: ${{ values.appName }}
+          image: us-central1-docker.pkg.dev/${{ values.gcpProjectId }}/${{ values.appName }}/${{ values.appName }}:latest
           ports:
             - containerPort: 5000
           env:
