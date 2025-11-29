@@ -1,0 +1,47 @@
+steps:
+  # Run tests
+  - name: 'python:3.11-slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -r requirements.txt
+        python -m pytest test_app.py -v || python -m unittest test_app -v
+
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:latest'
+      - '.'
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:latest'
+
+  # Update the Kubernetes deployment manifest
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        sed -i "s|image:.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA|g" manifests/deployment.yaml
+        cat manifests/deployment.yaml
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/{{appName}}/{{appName}}:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+

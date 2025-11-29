@@ -1,0 +1,131 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: python-flask-api
+  title: Python Flask REST API
+  description: A simple Flask REST API template with basic CRUD operations, health checks, and Docker support
+  tags:
+    - python
+    - flask
+    - api
+    - rest
+spec:
+  owner: backstage
+  type: service
+
+  parameters:
+    - title: Provide Component Information
+      required:
+        - appName
+        - description
+      properties:
+        appName:
+          title: Application Name
+          type: string
+          description: Unique name of the component (lowercase, no spaces)
+          ui:autofocus: true
+          pattern: '^[a-z0-9-]+$'
+          ui:help: 'Use lowercase letters, numbers, and hyphens only'
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this component does
+
+    - title: Choose a Repository Location
+      required:
+        - orgName
+        - repoUrl
+      properties:
+        orgName:
+          title: GitHub Organization
+          type: string
+          description: GitHub organization or username
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+    - title: Deployment Configuration
+      required:
+        - namespace
+        - gcpProjectId
+      properties:
+        gcpProjectId:
+          title: GCP Project ID
+          type: string
+          description: Google Cloud Project ID for container registry
+        namespace:
+          title: Kubernetes Namespace
+          type: string
+          default: default
+          description: Kubernetes namespace to deploy to
+
+  steps:
+    - id: fetch
+      name: Fetch Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          appName: ${{ parameters.appName }}
+          description: ${{ parameters.description }}
+          orgName: ${{ parameters.orgName }}
+          namespace: ${{ parameters.namespace }}
+          gcpProjectId: ${{ parameters.gcpProjectId }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        allowedHosts:
+          - github.com
+        description: ${{ parameters.description }}
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        repoVisibility: public
+
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+    - id: argocd
+      name: Create New Application in Argo CD
+      action: http:backstage:request
+      input:
+        method: 'POST'
+        path: '/proxy/argocd/api/applications'
+        headers:
+          content-type: 'application/json'
+        body:
+          metadata:
+            name: ${{ parameters.appName }}
+            namespace: argocd
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/${{ parameters.orgName }}/${{ parameters.appName }}.git
+              targetRevision: main
+              path: manifests
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: ${{ parameters.namespace }}
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+              syncOptions:
+                - CreateNamespace=true
+
+  output:
+    links:
+      - title: Open the Source Code Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

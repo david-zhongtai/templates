@@ -1,0 +1,46 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: {{appName}}
+  description: {{description}}
+  tags:
+    - python
+    - flask
+    - api
+    - rest
+    - kubernetes
+  annotations:
+    # GitHub integration
+    github.com/project-slug: {{orgName}}/{{appName}}
+
+    # ArgoCD integration
+    argocd/app-name: {{appName}}
+    argocd/app-namespace: argocd
+
+    # Kubernetes integration
+    backstage.io/kubernetes-id: {{appName}}
+    backstage.io/kubernetes-namespace: {{namespace}}
+    backstage.io/kubernetes-label-selector: app={{appName}}
+
+    # Container image
+    backstage.io/container-image: us-central1-docker.pkg.dev/{{gcpProjectId}}/{{appName}}/{{appName}}
+
+    # TechDocs (optional - enable if you add docs)
+    # backstage.io/techdocs-ref: dir:.
+
+  links:
+    - title: GitHub Repository
+      url: https://github.com/{{orgName}}/{{appName}}
+      icon: github
+    - title: ArgoCD Application
+      url: https://argocd.example.com/applications/{{appName}}
+      icon: cloud
+    - title: API Health Check
+      url: https://{{appName}}.example.com/health
+      icon: dashboard
+
+spec:
+  type: service
+  lifecycle: production
+  owner: backstage
+  system: default
