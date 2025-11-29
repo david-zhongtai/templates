@@ -9,3 +9,5 @@ spec:
   targets:
     - templates/python-flask-api/template.yaml
     - templates/k8s-secret/template.yaml
+  rules:
+    - allow: [Template, Location]
